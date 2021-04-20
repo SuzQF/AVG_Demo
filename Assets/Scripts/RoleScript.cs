@@ -1,0 +1,168 @@
+﻿using System.Collections;
+using UnityEngine;
+
+/*
+*Project Name: 
+*Create Date: 
+*Author: 
+*Update Record: 
+*
+*/
+
+/// <summary>
+///
+/// </summary>
+public class RoleScript : PerformanceManagerBase {
+	//主线脚本单例
+	public static RoleScript instance;
+
+	//当前场景的摄像机
+	public CameraController cameraController;
+
+	//当前演出章节名
+	public string currentChapter;
+
+	public Transform currentRoleTransform;
+
+	//反射
+	string mainStory = "MainStoryScript";
+
+	/// <summary>
+	/// 初始化
+	/// </summary>
+	private void Awake() {
+		InstanceInit();
+	}
+
+	/// <summary>
+	/// 单例初始化
+	/// </summary>
+	private void InstanceInit() {
+		if (instance == null) {
+			instance = this;
+		}
+
+		else if (instance != this) {
+			Destroy(gameObject);
+		}
+		DontDestroyOnLoad(gameObject);
+	}
+
+
+	/// <summary>
+	/// 角色章节入口
+	/// </summary>
+	/// <param name="ChapterNumber">第几章</param>
+	public void ChooseRoleChapter(Transform transform) {
+		ChapterStart("Role");
+
+		currentRoleTransform = transform;
+
+		//清除生成Perfab的“(Clone)”后缀
+		string chapterTopic = currentRoleTransform.name.Split('(')[0];
+		GM.Log("Chapter " + chapterTopic);
+
+		currentChapter = chapterTopic;
+		StartCoroutine(chapterTopic);
+	}
+
+	/// <summary>
+	/// Hatman脚本
+	/// </summary>
+	/// <returns></returns>
+	public IEnumerator Hatman() {
+		while (!isChapterEnd) {
+			switch (currentPerformance) {
+				case 0:
+					GM.Log("开启Line文件流");
+					LinesController.instance.linesReader = GM.instance.InitLineFileReader(currentChapter);
+
+					GM.Log("Arvin台词");
+					yield return StartCoroutine(LinesController.instance.NextLine());
+					break;
+				case 1:
+					GM.Log("Hatman台词");
+					yield return StartCoroutine(LinesController.instance.NextLine());
+
+					GM.Log("关闭Line文件流");
+					GM.instance.CloseLineFileReader();
+
+					//yield return StartCoroutine(LinesController.instance.NextLine());
+					ChapterEnd();
+					yield break;
+
+				default:
+					break;
+			}
+			currentPerformance += 1;
+			yield return new WaitForSeconds(waitSeconds);
+		}
+
+	}
+
+	/// <summary>
+	/// Oldman脚本
+	/// </summary>
+	/// <returns></returns>
+	public IEnumerator Oldman() {
+		while (!isChapterEnd) {
+			switch (currentPerformance) {
+				case 0:
+					GM.Log("开启Line文件流");
+					LinesController.instance.linesReader = GM.instance.InitLineFileReader(currentChapter);
+
+					GM.Log("Oldman台词");
+					yield return StartCoroutine(LinesController.instance.NextLine());
+
+					GM.Log("Oldman台词");
+					yield return StartCoroutine(LinesController.instance.NextLine());
+
+					GM.Log("Oldman台词");
+					yield return StartCoroutine(LinesController.instance.NextLine());
+
+					GM.Log("Oldman台词");
+					yield return StartCoroutine(LinesController.instance.NextLine());
+
+					GM.Log("Oldman台词");
+					yield return StartCoroutine(LinesController.instance.NextLine());
+
+					GM.Log("Arvin台词");
+					yield return StartCoroutine(LinesController.instance.NextLine());
+
+					GM.Log("关闭Line文件流");
+					GM.instance.CloseLineFileReader();
+
+					ChapterEnd();
+					yield break;
+
+				default:
+					break;
+			}
+			currentPerformance += 1;
+			yield return new WaitForSeconds(waitSeconds);
+		}
+
+	}
+
+	/// <summary>
+	/// 章节结束整理
+	/// </summary>
+	protected override void ChapterEnd() {
+
+		GM.Log("Role Chapter End");
+
+		//章节结束flag，跳出章节演出循环
+		isChapterEnd = true;
+
+		//重置演出指针
+		currentPerformance = 0;
+
+		waitSeconds = 0;
+
+		//重置章节类型Flag
+		isRoleChapter = false;
+
+		//章节结束，退出交互模式
+		GM.instance.OutFromInteractMode();
+	}
+}
