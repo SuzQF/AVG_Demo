@@ -1,0 +1,11 @@
+Bearded#小伙子？
+Arvin#大叔？
+Bearded#你是外村人吧
+Arvin#是
+Bearded#要不要来咱酒馆喝一杯？
+Bearded#铁匠村的烈酒，不容错过啊
+Arvin#谢谢，不了
+Arvin#我是来找医师弥的
+Bearded#这样啊
+Bearded#他的诊所就在前面，直走就是
+Arvin#谢谢
